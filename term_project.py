@@ -1,7 +1,10 @@
 import findspark
+import matplotlib
 findspark.init() 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import SQLContext
+import pandas as pd
+
 
 sc = SparkContext()
 sqlContext = SQLContext(sc)
@@ -13,10 +16,10 @@ company_df.printSchema()
 
 company_df.describe().toPandas().transpose()
 
-import pandas as pdnumeric_features 
-pdnumeric_features = [t[0] for t in company_df.dtypes if t[1] == 'int' or t[1] == 'double']
+
+numeric_features = [t[0] for t in company_df.dtypes if t[1] == 'int' or t[1] == 'double']
 sampled_data = company_df.select(numeric_features).sample(False, 0.8).toPandas()
-axs = pd.scatter_matrix(sampled_data, figsize=(10, 10))
+axs = pd.plotting.scatter_matrix(sampled_data, figsize=(10, 10))
 n = len(sampled_data.columns)
 for i in range(n):
     v = axs[i, 0]
