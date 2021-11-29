@@ -5,6 +5,10 @@ from pyspark.mllib.util import MLUtils
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.linalg import Vectors
 from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.classification import LinearSVC
+from pyspark.mllib.linalg import SparseVector
+from pyspark.mllib.classification import SVMWithSGD
+from pyspark.mllib.classification import LogisticRegressionWithLBFGS, LogisticRegressionModel
 import pandas as pd
 
 # setup
@@ -17,6 +21,7 @@ splitData1 = rdd.flatMap(lambda df1: df1.split('\n'))
 splitData2 = splitData1.map(lambda sd: sd.split('\t'))
 temp = splitData2.toDF()
 trainingData = temp.toPandas()
+training2 = temp
 
 #testing data
 rdd = sc.textFile('/liar_dataset/test.tsv')
@@ -87,3 +92,28 @@ def clean_data(df):
 
 clean_data(trainingData)
 clean_data(testingData)
+#clean_data(training2)
+
+print('Before conversion')
+print(type(trainingData))
+
+#rd = sqlc.createDataFrame(trainingData)
+#print('After conversion')
+#print(type(rd))
+#print(rd.first())
+#rddataframe.foreach(lambda row: LabeledPoint(row[0],row[2:len(row)]))
+#rddataframe.rdd.foreach(labelCon)
+svmdata = trainingData.to_numpy().tolist()
+
+for i in range(0,len(svmdata)):
+    svmdata[i] = LabeledPoint(svmdata[i][0], svmdata[i][2:len(svmdata)])
+print('After Mapping')
+print(type(svmdata))
+#print(lblPoint[0])
+print(svmdata[0:7])
+
+model = LogisticRegressionWithLBFGS.train(sc.parallelize(svmdata), numClasses=6)
+
+
+
+
