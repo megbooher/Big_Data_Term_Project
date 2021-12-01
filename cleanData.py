@@ -98,18 +98,18 @@ def stats_generator(predictionAndLabels):
     metrics2 = MulticlassMetrics(predictionAndLabels)
     metrics3 = RegressionMetrics(predictionAndLabels)
     stats.append("Binary Classification Metrics")
-    stats.append("Area under the precision-recall curve %f: " %metrics.areaUnderPR)
-    stats.append("Area under the receiver operating characteristic (ROC) curve %f: " %metrics.areaUnderROC)
+    stats.append("Area under the precision-recall curve: %f" %metrics.areaUnderPR)
+    stats.append("Area under the receiver operating characteristic (ROC) curve: %f" %metrics.areaUnderROC)
     stats.append("Regression Metrics")
-    stats.append("Explained variance regression score %f: " %metrics3.explainedVariance)
-    stats.append("Mean absolute error %f: " %metrics3.meanAbsoluteError)
-    stats.append("Mean squared error, %f: " %metrics3.meanSquaredError)
-    stats.append("Square root of the mean squared error %f: " %metrics3.rootMeanSquaredError)
+    stats.append("Explained variance regression score: %f" %metrics3.explainedVariance)
+    stats.append("Mean absolute error: %f" %metrics3.meanAbsoluteError)
+    stats.append("Mean squared error: %f" %metrics3.meanSquaredError)
+    stats.append("Square root of the mean squared error: %f" %metrics3.rootMeanSquaredError)
     stats.append("Multiclass Metrics")
-    stats.append("Model accuracy %f: " %metrics2.accuracy)
-    stats.append("Weighted false positive rate %f: " %metrics2.weightedFalsePositiveRate)
-    stats.append("Weighted averaged precision. %f: " %metrics2.weightedPrecision)
-    stats.append("Weighted averaged recall %f: " %metrics2.weightedRecall)
+    stats.append("Model accuracy: %f" %metrics2.accuracy)
+    stats.append("Weighted false positive rate: %f" %metrics2.weightedFalsePositiveRate)
+    stats.append("Weighted averaged precision:%f" %metrics2.weightedPrecision)
+    stats.append("Weighted averaged recall: %f" %metrics2.weightedRecall)
     return stats
 
 clean_data(trainingData)
@@ -139,4 +139,6 @@ for j in range(0, len(tDataLabel)):
     pL.append((float(model.predict(tDatafeatures[j])), float(tDataLabel[j])))
 
 
-print(stats_generator(sc.parallelize(pL)))
+logisticRegressionStats = sc.parallelize(stats_generator(sc.parallelize(pL)))
+
+logisticRegressionStats.saveAsTextFile("/liar_dataset/LR_Stats")
