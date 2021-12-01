@@ -1,0 +1,13 @@
+Binary Classification Metrics
+Area under the precision-recall curve: 0.865601
+Area under the receiver operating characteristic (ROC) curve: 0.577003
+Regression Metrics
+Explained variance regression score: 1.215230
+Mean absolute error: 1.307872
+Mean squared error: 2.938426
+Square root of the mean squared error: 1.714184
+Multiclass Metrics
+Model accuracy: 0.273578
+Weighted false positive rate: 0.176421
+Weighted averaged precision:0.238256
+Weighted averaged recall: 0.273578

@@ -9,6 +9,7 @@ from pyspark.ml.classification import LinearSVC
 from pyspark.mllib.linalg import SparseVector
 from pyspark.mllib.classification import SVMWithSGD
 from pyspark.mllib.classification import LogisticRegressionWithLBFGS, LogisticRegressionModel
+from pyspark.mllib.evaluation import BinaryClassificationMetrics, MulticlassMetrics, RegressionMetrics
 import pandas as pd
 
 # setup
@@ -89,31 +90,55 @@ def clean_data(df):
                         inplace=True)
 
 ##########################################################
+###################### Stats Stuff :) ####################
+##########################################################
+def stats_generator(predictionAndLabels):
+    stats =[]
+    metrics = BinaryClassificationMetrics(predictionAndLabels)
+    metrics2 = MulticlassMetrics(predictionAndLabels)
+    metrics3 = RegressionMetrics(predictionAndLabels)
+    stats.append("Binary Classification Metrics")
+    stats.append("Area under the precision-recall curve: %f" %metrics.areaUnderPR)
+    stats.append("Area under the receiver operating characteristic (ROC) curve: %f" %metrics.areaUnderROC)
+    stats.append("Regression Metrics")
+    stats.append("Explained variance regression score: %f" %metrics3.explainedVariance)
+    stats.append("Mean absolute error: %f" %metrics3.meanAbsoluteError)
+    stats.append("Mean squared error: %f" %metrics3.meanSquaredError)
+    stats.append("Square root of the mean squared error: %f" %metrics3.rootMeanSquaredError)
+    stats.append("Multiclass Metrics")
+    stats.append("Model accuracy: %f" %metrics2.accuracy)
+    stats.append("Weighted false positive rate: %f" %metrics2.weightedFalsePositiveRate)
+    stats.append("Weighted averaged precision:%f" %metrics2.weightedPrecision)
+    stats.append("Weighted averaged recall: %f" %metrics2.weightedRecall)
+    return stats
 
 clean_data(trainingData)
 clean_data(testingData)
-#clean_data(training2)
 
-print('Before conversion')
-print(type(trainingData))
-
-#rd = sqlc.createDataFrame(trainingData)
-#print('After conversion')
-#print(type(rd))
-#print(rd.first())
-#rddataframe.foreach(lambda row: LabeledPoint(row[0],row[2:len(row)]))
-#rddataframe.rdd.foreach(labelCon)
 svmdata = trainingData.to_numpy().tolist()
 
 for i in range(0,len(svmdata)):
     svmdata[i] = LabeledPoint(svmdata[i][0], svmdata[i][2:len(svmdata)])
-print('After Mapping')
-print(type(svmdata))
-#print(lblPoint[0])
-print(svmdata[0:7])
 
+print('After Mapping')
+
+#Train the model
 model = LogisticRegressionWithLBFGS.train(sc.parallelize(svmdata), numClasses=6)
 
+print("Testing data")
+print(testingData)
+tDataLabel = []
+tDatafeatures = []
+for i in testingData.to_numpy().tolist():
+    tDataLabel.append(i[0])
+    tDatafeatures.append(i[2:])
+
+#Prepare the data for the stats gen
+pL = [] 
+for j in range(0, len(tDataLabel)):
+    pL.append((float(model.predict(tDatafeatures[j])), float(tDataLabel[j])))
 
 
+logisticRegressionStats = sc.parallelize(stats_generator(sc.parallelize(pL)))
 
+logisticRegressionStats.saveAsTextFile("/liar_dataset/LR_Stats")
