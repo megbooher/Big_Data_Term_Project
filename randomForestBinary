@@ -36,11 +36,11 @@ party = []
 #functions
 def change_label(col):
     for i in range(0, col.size):
-        if col[i] == "true" or col[i] == "mostly-true" or col[i] == "half-true":
+        if col[i] == "true" or col[i] == "mostly-true" or col[i] == "half-true" or col[i] == "barely-true":
             col[i] = 0
-        else: # barely-true, false, and pants on fire
+        else: # false, and pants on fire
             col[i] = 1
-
+            
 def change_numeric(features, col):
     for i in range(0,col.size):
         if col[i] in features:
